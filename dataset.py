@@ -77,3 +77,26 @@ class Embedding(nn.Module):
 
     def forward(self,data):
         return self.embeddibg(data)
+        
+
+
+# voc = Vocabulary()
+# vocab = voc(text)
+# vocab_size = voc.get_vocab_size()
+# print(vocab_size)
+
+# tok = Tokenizer()
+
+# stoi,itos = tok(vocab)
+# data = tok.build_(text)
+# tts = Train_Test_Split(0.9)
+# train_data,val_data = tts(data)
+# batching = Batching(train_data,val_data,config)
+# x,y = batching("train")
+
+# emb = Embedding(65,30)
+# x = emb(x)
+
+# print(x.shape)
+# # print("/n")
+# # print(y)
