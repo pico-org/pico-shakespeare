@@ -3,7 +3,8 @@ def def_config():
         "lr":1e-3,
         "n_emb":128,
         "head_dim":256,
-        "seq_len":8,
-        "batch_size":32,
-        "num_hidden":512
+        "seq_len":5,
+        "batch_size":3,
+        "num_hidden":512,
+
     }
