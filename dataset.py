@@ -1,11 +1,8 @@
 import torch
 import torch.nn as nn
-from config import def_config
-
-config = def_config()
 
 # loading dataset
-with open("/home/smruti/Desktop/git repos/pico-shakespeare/input.txt","r") as f:
+with open("input.txt","r") as f:
     text = f.read()
 
 class Vocabulary:
@@ -56,7 +53,7 @@ class Batching:
     self.train_data = train_data
     self.val_data = val_data
     self.batch_size = config['batch_size']
-    self.block_size = config['seq_len']
+    self.block_size = config['block_size']
 
   def __call__(self,split):
     self.split = split
@@ -67,36 +64,3 @@ class Batching:
     return x,y
 
 
-
-class Embedding(nn.Module):
-    def __init__(self,n_vocab,n_embed):
-        super().__init__()
-        self.n_vocab = n_vocab
-        self.n_embed = n_embed
-        self.embeddibg = nn.Embedding(self.n_vocab,self.n_embed)
-
-    def forward(self,data):
-        return self.embeddibg(data)
-        
-
-
-# voc = Vocabulary()
-# vocab = voc(text)
-# vocab_size = voc.get_vocab_size()
-# print(vocab_size)
-
-# tok = Tokenizer()
-
-# stoi,itos = tok(vocab)
-# data = tok.build_(text)
-# tts = Train_Test_Split(0.9)
-# train_data,val_data = tts(data)
-# batching = Batching(train_data,val_data,config)
-# x,y = batching("train")
-
-# emb = Embedding(65,30)
-# x = emb(x)
-
-# print(x.shape)
-# # print("/n")
-# # print(y)
