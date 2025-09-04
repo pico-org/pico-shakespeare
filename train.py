@@ -6,7 +6,7 @@ def main():
     print(f"Model parameters: {sum(p.numel() for p in model.Model(model.config).parameters()):,}")
     print()
     trained_model = model.train_model()
-    generated = model.generate_text(trained_model, model.tok, max_new_tokens=500)
+    generated = model.generate_text(trained_model, model.ptt, max_new_tokens=500)
     print(generated)
     
     # Save the model
@@ -15,3 +15,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

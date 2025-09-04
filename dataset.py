@@ -1,5 +1,9 @@
 import torch
 import torch.nn as nn
+import config
+from transformers import AutoTokenizer
+
+config = config.def_config()
 
 # loading dataset
 with open("input.txt","r") as f:
@@ -62,5 +66,20 @@ class Batching:
     x = torch.stack([data[i:i+self.block_size] for i in ix])
     y = torch.stack([data[i+1:i+self.block_size+1] for i in ix])
     return x,y
+
+
+class Pre_Trained_Tokenizer:
+    def __init__(self):
+        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+    def __call__(self,text):
+        return torch.tensor(self.tokenizer.encode(text))
+    
+    def get_vocab_size(self):
+        return self.tokenizer.vocab_size
+    
+    def decoder(self, token_ids):
+        """Add decoder method to match the interface expected by generate_text"""
+        return self.tokenizer.decode(token_ids, skip_special_tokens=True)
 
 

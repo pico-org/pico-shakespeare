@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from config import def_config
 import dataset as d
+import transformers 
+
 
 config = def_config()
 
@@ -10,20 +12,27 @@ config = def_config()
 with open("input.txt", "r") as f:
     text = f.read()
 
-voc = d.Vocabulary()
-vocab = voc(text)
-vocab_size = voc.get_vocab_size()
-print(f"Vocabulary size: {vocab_size}")
+# voc = d.Vocabulary()
+# vocab = voc(text)
+# vocab_size = voc.get_vocab_size()
+# print(f"Vocabulary size: {vocab_size}")
 
-config['vocab_size'] = vocab_size
 
-tok = d.Tokenizer()
-stoi, itos = tok(vocab)
-data = tok.build_(text)
+# tok = d.Tokenizer()
+# stoi, itos = tok(vocab)
+# data = tok.build_(text)
+# tts = d.Train_Test_Split(0.9)
+# train_data, val_data = tts(data)
+# batching = d.Batching(train_data, val_data, config)
+
+
+
+ptt = d.Pre_Trained_Tokenizer()
+data = ptt(text)
 tts = d.Train_Test_Split(0.9)
-train_data, val_data = tts(data)
-batching = d.Batching(train_data, val_data, config)
-
+train_data,val_data = tts(data)
+batching = d.Batching(train_data,val_data,config)
+config['vocab_size'] = ptt.get_vocab_size()
 
 class FeedForwardLayer(nn.Module):
     def __init__(self, n_emb, dropout=0.1):
@@ -121,6 +130,39 @@ class Model(nn.Module):
 
         return logits, loss
 
+
+class Model1(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.token_embedding_table = nn.Embedding(config['vocab_size'], config['n_emb'])
+        self.position_embedding_table = nn.Embedding(config['block_size'], config['n_emb'])
+        self.blocks = nn.Sequential(*[TransformerBlock(config) for _ in range(4)]) 
+        self.ln_f = nn.LayerNorm(config['n_emb']) 
+        self.lm_head = nn.Linear(config['n_emb'], config['vocab_size'])
+
+    def forward(self, idx, targets=None):
+        B, T = idx.shape
+        tok_emb = self.token_embedding_table(idx)  
+        pos_emb = self.position_embedding_table(torch.arange(T, device=idx.device)) 
+        x = tok_emb + pos_emb  
+        x = self.blocks(x)  
+        x = self.ln_f(x)  
+        logits = self.lm_head(x) 
+
+        if targets is None:
+            loss = None
+        else:
+            B, T, C = logits.shape
+            logits = logits.view(B*T, C)
+            targets = targets.view(B*T)
+            loss = F.cross_entropy(logits, targets)
+
+        return logits, loss
+
+
+
+
     def generate(self, idx, max_new_tokens):
         for _ in range(max_new_tokens):
             idx_cond = idx[:, -self.config['block_size']:]
@@ -166,6 +208,6 @@ if __name__ == "__main__":
     print("Starting training...")
     trained_model = train_model()
     print("\nGenerating text...")
-    generated = generate_text(trained_model, tok, max_new_tokens=500)
+    generated = generate_text(trained_model, ptt, max_new_tokens=500)
     print("Generated text:")
     print(generated)
